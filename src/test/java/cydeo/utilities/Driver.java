@@ -8,8 +8,11 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The {@code Driver} class is a utility for managing WebDriver instances using the Singleton pattern.
@@ -86,6 +89,26 @@ public class Driver {
                     ChromeOptions options = new ChromeOptions();
                     options.addArguments("--headless=new");
                     driverPool.set(new ChromeDriver(options));
+                    break;
+                case "cloud-chrome":
+                    ChromeOptions browserOptions = new ChromeOptions();
+                    browserOptions.setPlatformName("macOS 10.15");
+                    browserOptions.setBrowserVersion("latest");
+                    Map<String, Object> sauceOptions = new HashMap<>();
+                    sauceOptions.put("username", "nailbulbu");
+                    sauceOptions.put("accessKey", "ccaed296-3a22-42a9-94db-db2ff114fb18");
+                    sauceOptions.put("build", "<your build id>");
+                    sauceOptions.put("name", "<your test name>");
+                    browserOptions.setCapability("sauce:options", sauceOptions);
+
+                    URL url = null;
+                    try {
+                        url = new URL("https://ondemand.us-west-1.saucelabs.com:443/wd/hub");
+                    } catch (MalformedURLException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    driverPool.set(new RemoteWebDriver(url,browserOptions));
                     break;
                 default:
                     throw new IllegalArgumentException("Invalid browser type specified in the configuration: " + browserType);
